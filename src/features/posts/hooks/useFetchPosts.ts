@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPosts } from "@/features/posts/api";
-import { postKeys } from "@/features/posts/constants";
+import {Post, postSchema} from "@/features/posts/schema";
+import {getPosts} from "@/features/posts/api";
+import { queryKey, POSTS_QUERY_KEYS } from "@/features/posts/constant";
 
-export function usePosts() {
+export function useFetchPosts(){
   return useQuery({
-    queryKey: postKeys.all,
+    queryKey: POSTS_QUERY_KEYS.all,
     queryFn: getPosts,
     staleTime: Infinity,
   });
 }
+// ddue whatr the furk is wrong with ya
