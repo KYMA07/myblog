@@ -1,29 +1,60 @@
-"use client";
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { usePosts } from "@/features/posts/hooks/useFetchPosts";
-import { PostCard } from "./post-card";
+import { useFetchPosts } from "../hooks/useFetchPosts";
+import { useFetchNames, useFetchAvatar } from "../hooks/useFetchUser";
+import { PostListSkeleton } from "./posts-list-skeleton";
+import { PostsCard } from "./posts-card";
 
 export function PostList() {
-  const { data, isPending, isError } = usePosts();
+  const {
+    data: postData,
+    isLoading: postLoading,
+    isError: postError,
+  } = useFetchPosts();
 
-  if (isPending) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full" />
-        ))}
-      </div>
-    );
-  }
-  if (isError) return <p>Could not load posts.</p>;
-  if (data.length === 0) return <p>No posts yet.</p>;
+  const {
+    data: userData,
+    isLoading: userLoading,
+    isError: userError,
+  } = useFetchNames();
 
-  return (
-    <div className="space-y-4">
-      {data.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
-  );
-}
+  const {
+    data: picData,
+    isLoading: picLoading,
+    isError: picError,
+  } = useFetchAvatar();
+
+  if (postLoading || userLoading ||picLoading) return <PostListSkeleton />;
+
+  if (postError || userError ||picError) return <p>Error loading posts.</p>;
+
+  if (!userData || !postData ||!picData) return null;
+
+  const usersMap = new Map(
+  userData.map((user) => [user.id, user])
+);
+const picMap = new Map(
+  picData.map((avatar) => [avatar.id, avatar])
+);
+
+return (
+  <div className="space-y-4">
+    {postData.map((post) => (
+      <PostsCard
+        key={post.id}
+        post={post}
+        name={usersMap.get(post.id)}
+        avatar={
+        picMap.get(post.id) ?? {
+            albumId: 0,
+            id: 0,
+            title: "Default avatar",
+            url: "/default-avatar.png",
+            thumbnailUrl: "/default-avatar.png",
+        }
+        }
+      />
+    ))}
+  </div>
+);
+}//fuckin name br
